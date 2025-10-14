@@ -81,56 +81,64 @@ export const WeekCalendar = () => {
                       return (
                         <div
                           key={tutorial.id}
-                          className={`absolute left-1 right-1 ${colorClass} text-white rounded-md p-1.5 shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105 cursor-pointer overflow-hidden group`}
+                          className={`absolute left-1 right-1 ${colorClass} text-white rounded-md p-2 shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105 cursor-pointer overflow-hidden group`}
                           style={{
                             top: `${top}px`,
                             height: "72px", // ~1.5 hour blocks
                           }}
                         >
-                          {/* Course name - full width */}
-                          <div className="text-[10px] font-semibold leading-tight line-clamp-1 mb-1">
+                          {/* Course name - single line, readable */}
+                          <div className="text-xs font-semibold leading-tight truncate mb-1">
                             {tutorial.courseName}
                           </div>
                           
-                          {/* Two column layout for remaining info */}
-                          <div className="flex gap-1 text-[9px] opacity-90">
-                            {/* Left column */}
-                            <div className="flex-1 min-w-0">
+                          {/* Compact info row */}
+                          <div className="flex items-center justify-between gap-2 text-[11px] opacity-95">
+                            {/* Left: group (if any) */}
+                            <div className="min-w-0 truncate">
                               {tutorial.group && (
-                                <div className="truncate font-medium">{tutorial.group}</div>
-                              )}
-                              {tutorial.instructor && (
-                                <div className="truncate mt-0.5">{tutorial.instructor}</div>
+                                <span className="truncate">{tutorial.group}</span>
                               )}
                             </div>
                             
-                            {/* Right column - location icon only */}
-                            <div className="flex items-start">
-                              <MapPin className="w-3 h-3 shrink-0" />
-                            </div>
+                            {/* Right: location (icon + short code) clickable */}
+                            <a
+                              href={tutorial.locationUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="shrink-0 inline-flex items-center gap-1 hover:underline"
+                              title={tutorial.location}
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <MapPin className="w-3 h-3" />
+                              <span className="hidden sm:inline truncate max-w-[90px]">
+                                {tutorial.location.split(",")[0]}
+                              </span>
+                            </a>
                           </div>
                           
-                          {/* Tooltip on hover */}
-                          <div className="absolute inset-0 bg-black/90 opacity-0 group-hover:opacity-100 transition-opacity p-2 rounded-md flex flex-col justify-center text-xs">
-                            <div className="font-semibold mb-1">
+                          {/* Tooltip on hover - concise + clear link */}
+                          <div className="absolute inset-0 bg-black/80 opacity-0 group-hover:opacity-100 transition-opacity p-2 rounded-md flex flex-col justify-center text-xs gap-1">
+                            <div className="font-semibold truncate">
                               {tutorial.courseName}
                             </div>
-                            <div className="font-medium mb-1">
+                            <div className="font-medium">
                               {tutorial.time} Uhr
                             </div>
                             {tutorial.group && (
-                              <div className="mb-1">{tutorial.group}</div>
+                              <div className="truncate">{tutorial.group}</div>
                             )}
                             {tutorial.instructor && (
-                              <div className="mb-1">{tutorial.instructor}</div>
+                              <div className="truncate">{tutorial.instructor}</div>
                             )}
                             <a
                               href={tutorial.locationUrl}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="underline hover:text-accent"
+                              className="mt-1 inline-flex items-center gap-1 underline underline-offset-2 hover:text-accent"
                               onClick={(e) => e.stopPropagation()}
                             >
+                              <MapPin className="w-3 h-3" />
                               {tutorial.location}
                             </a>
                           </div>
