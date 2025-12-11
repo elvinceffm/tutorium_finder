@@ -1,73 +1,51 @@
-# Welcome to your Lovable project
+# TUM Politik-Tutorien Navigator
 
-## Project info
+Ein interaktives Tool, um schnell und einfach passende Politik-Tutorien an der Technischen Universität München (TUM) zu finden. Das Projekt bietet eine Übersicht und eine Kalenderansicht aller verfügbaren Kurse und Termine.
 
-**URL**: https://lovable.dev/projects/0756138d-ff06-4eb5-a91e-584496ef2cb2
+## Features
 
-## How can I edit this code?
+- **Kursübersicht**: Alle Politik-Tutorien auf einen Blick.
+- **Kalenderansicht**: Visuelle Darstellung der Termine im Wochenverlauf.
+- **Filter**: Filtern nach Wochentagen, Uhrzeiten oder spezifischen Kursen.
+- **Responsive Design**: Optimiert für Desktop und mobile Geräte.
 
-There are several ways of editing your application.
+## Technologien
 
-**Use Lovable**
+Dieses Projekt wurde mit modernen Web-Technologien erstellt:
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/0756138d-ff06-4eb5-a91e-584496ef2cb2) and start prompting.
+- [Vite](https://vitejs.dev/) - Next Generation Frontend Tooling
+- [React](https://reactjs.org/) - JavaScript-Bibliothek für Benutzeroberflächen
+- [TypeScript](https://www.typescriptlang.org/) - Typisiertes JavaScript
+- [Tailwind CSS](https://tailwindcss.com/) - Utility-first CSS Framework
+- [shadcn/ui](https://ui.shadcn.com/) - Wiederverwendbare Komponenten
 
-Changes made via Lovable will be committed automatically to this repo.
+## Installation & Entwicklung
 
-**Use your preferred IDE**
+Um das Projekt lokal auszuführen:
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+1.  Repository klonen:
+    ```bash
+    git clone https://github.com/elvinceffm/tutorium_finder.git
+    cd tutorium_finder
+    ```
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+2.  Abhängigkeiten installieren:
+    ```bash
+    npm install
+    ```
 
-Follow these steps:
+3.  Entwicklungsserver starten:
+    ```bash
+    npm run dev
+    ```
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+## Deployment
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+Das Projekt ist für das Deployment auf **Cloudflare Pages** konfiguriert.
 
-# Step 3: Install the necessary dependencies.
-npm i
+- **Build Command**: `npm run build`
+- **Output Directory**: `dist`
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
+## Lizenz
 
-**Edit a file directly in GitHub**
-
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
-
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/0756138d-ff06-4eb5-a91e-584496ef2cb2) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+MIT
