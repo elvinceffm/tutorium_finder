@@ -84,7 +84,7 @@ export const WeekCalendar = () => {
                           className={`absolute left-1 right-1 ${colorClass} text-white rounded-md p-2 shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105 cursor-pointer overflow-hidden group`}
                           style={{
                             top: `${top}px`,
-                            height: "72px", // ~1.5 hour blocks
+                            height: "120px", // 90 minutes (1.5 hours * 80px/hour)
                           }}
                         >
                           {/* Course name - single line, readable */}
