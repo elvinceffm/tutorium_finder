@@ -1,4 +1,6 @@
-export interface Tutorial {
+const fs = require('fs');
+
+const fileContent = `export interface Tutorial {
   id: string;
   courseName: string;
   group: string;
@@ -66,3 +68,6 @@ export const getCourseColor = (courseName: string): string => {
   
   return colors[Math.abs(hash) % colors.length];
 };
+`;
+
+fs.writeFileSync('src/data/tutorials.ts', fileContent);

@@ -7,6 +7,7 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState("overview");
+  const [selectedSemester, setSelectedSemester] = useState<number>(2);
 
   return (
     <div className="min-h-screen bg-background">
@@ -34,6 +35,27 @@ const Index = () => {
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-6 sm:py-8 lg:py-12">
+        <div className="flex flex-col items-center mb-8 gap-4">
+          <div className="bg-muted/50 p-1 rounded-full inline-flex relative items-center ring-1 ring-border/50">
+            <div 
+              className="absolute bg-background rounded-full shadow-sm transition-transform duration-300 h-9 w-[140px]"
+              style={{ transform: `translateX(${selectedSemester === 1 ? '0%' : '100%'})` }}
+            />
+            <button 
+              onClick={() => setSelectedSemester(1)}
+              className={`relative z-10 w-[140px] h-9 text-sm font-medium transition-colors ${selectedSemester === 1 ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+            >
+              WiSe 25/26
+            </button>
+            <button 
+              onClick={() => setSelectedSemester(2)}
+              className={`relative z-10 w-[140px] h-9 text-sm font-medium transition-colors ${selectedSemester === 2 ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+            >
+              SoSe 2026
+            </button>
+          </div>
+        </div>
+
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full max-w-md mx-auto grid-cols-2 mb-8">
             <TabsTrigger value="overview" className="flex items-center gap-2">
@@ -47,11 +69,11 @@ const Index = () => {
           </TabsList>
 
           <TabsContent value="overview">
-            <TutorialOverview />
+            <TutorialOverview selectedSemester={selectedSemester} />
           </TabsContent>
 
           <TabsContent value="calendar">
-            <WeekCalendar />
+            <WeekCalendar selectedSemester={selectedSemester} />
           </TabsContent>
         </Tabs>
       </main>

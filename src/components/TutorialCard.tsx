@@ -1,4 +1,4 @@
-import { Clock, MapPin, User, Languages } from "lucide-react";
+import { Clock, MapPin, User, Languages, BookOpen, Users } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tutorial, getCourseColor } from "@/data/tutorials";
@@ -11,18 +11,31 @@ export const TutorialCard = ({ tutorial }: TutorialCardProps) => {
   const colorClass = getCourseColor(tutorial.courseName);
   
   return (
-    <Card className="hover:shadow-lg transition-all duration-300 hover:-translate-y-1 group">
+    <Card className={`hover:shadow-lg transition-all duration-300 hover:-translate-y-1 group relative overflow-hidden ${tutorial.type === "Vorlesung" ? "border-primary/50" : ""}`}>
+      {tutorial.type === "Vorlesung" && (
+         <div className="absolute top-0 right-0 w-16 h-16 pointer-events-none overflow-hidden">
+           <div className="absolute top-4 -right-4 bg-primary text-primary-foreground text-[10px] font-bold py-0.5 px-6 rotate-45 shadow-sm">
+             VORLESUNG
+           </div>
+         </div>
+      )}
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between gap-2">
           <CardTitle className="text-lg leading-tight group-hover:text-primary transition-colors">
             {tutorial.courseName}
           </CardTitle>
-          {tutorial.language && (
-            <Badge variant="outline" className="shrink-0">
-              <Languages className="w-3 h-3 mr-1" />
-              {tutorial.language.toUpperCase()}
+          <div className="flex flex-col gap-1 shrink-0 items-end z-10">
+            {tutorial.language && (
+              <Badge variant="outline" className="shrink-0 w-fit">
+                <Languages className="w-3 h-3 mr-1" />
+                {tutorial.language.toUpperCase()}
+              </Badge>
+            )}
+            <Badge variant={tutorial.type === "Vorlesung" ? "default" : "secondary"} className="shrink-0 w-fit">
+              {tutorial.type === "Vorlesung" ? <BookOpen className="w-3 h-3 mr-1" /> : <Users className="w-3 h-3 mr-1" />}
+              {tutorial.type}
             </Badge>
-          )}
+          </div>
         </div>
         {tutorial.group && (
           <Badge className={`w-fit mt-2 ${colorClass} text-white`}>

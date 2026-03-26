@@ -3,17 +3,18 @@ import { TutorialCard } from "./TutorialCard";
 import { TutorialFilters } from "./TutorialFilters";
 import { tutorials } from "@/data/tutorials";
 
-export const TutorialOverview = () => {
+export const TutorialOverview = ({ selectedSemester }: { selectedSemester: number }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedWeekday, setSelectedWeekday] = useState("all");
   const [selectedCourse, setSelectedCourse] = useState("all");
 
   const availableCourses = useMemo(() => {
-    return Array.from(new Set(tutorials.map((t) => t.courseName))).sort();
+    return Array.from(new Set(tutorials.filter(t => t.semester === selectedSemester).map((t) => t.courseName))).sort();
   }, []);
 
   const filteredTutorials = useMemo(() => {
     return tutorials.filter((tutorial) => {
+      if (tutorial.semester !== selectedSemester) return false;
       const matchesSearch =
         searchQuery === "" ||
         tutorial.courseName.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -28,7 +29,7 @@ export const TutorialOverview = () => {
 
       return matchesSearch && matchesWeekday && matchesCourse;
     });
-  }, [searchQuery, selectedWeekday, selectedCourse]);
+  }, [searchQuery, selectedWeekday, selectedCourse, selectedSemester]);
 
   return (
     <div className="animate-in fade-in duration-500">

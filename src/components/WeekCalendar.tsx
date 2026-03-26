@@ -1,9 +1,9 @@
 import { useMemo } from "react";
 import { tutorials, weekdays, getCourseColor } from "@/data/tutorials";
 import { Card } from "@/components/ui/card";
-import { MapPin, User } from "lucide-react";
+import { MapPin, User, BookOpen } from "lucide-react";
 
-export const WeekCalendar = () => {
+export const WeekCalendar = ({ selectedSemester }: { selectedSemester: number }) => {
   // Generate time slots from 8:00 to 18:00
   const timeSlots = useMemo(() => {
     const slots = [];
@@ -21,7 +21,7 @@ export const WeekCalendar = () => {
   };
 
   const getTutorialsForDay = (day: string) => {
-    return tutorials.filter((t) => t.weekday === day);
+    return tutorials.filter((t) => t.weekday === day && t.semester === selectedSemester);
   };
 
   return (
@@ -81,13 +81,18 @@ export const WeekCalendar = () => {
                       return (
                         <div
                           key={tutorial.id}
-                          className={`absolute left-1 right-1 ${colorClass} text-white rounded-md p-2 shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105 cursor-pointer overflow-hidden group`}
+                          className={`absolute left-1 right-1 ${tutorial.type === "Vorlesung" ? "ring-2 ring-white/50 border border-white/20" : ""} ${colorClass} text-white rounded-md p-2 shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105 cursor-pointer overflow-hidden group`}
                           style={{
                             top: `${top}px`,
                             height: "120px", // 90 minutes (1.5 hours * 80px/hour)
                           }}
                         >
                           {/* Course name - single line, readable */}
+                          {tutorial.type === "Vorlesung" && (
+                            <div className="absolute top-0 right-0 bg-primary/20 backdrop-blur-md rounded-bl-lg px-1 py-0.5">
+                              <BookOpen className="w-3 h-3" />
+                            </div>
+                          )}
                           <div className="text-xs font-semibold leading-tight truncate mb-1">
                             {tutorial.courseName}
                           </div>
@@ -120,6 +125,7 @@ export const WeekCalendar = () => {
                           {/* Tooltip on hover - concise + clear link */}
                           <div className="absolute inset-0 bg-black/80 opacity-0 group-hover:opacity-100 transition-opacity p-2 rounded-md flex flex-col justify-center text-xs gap-1">
                             <div className="font-semibold truncate">
+                              {tutorial.type === "Vorlesung" ? "📚 Vorlesung: " : ""}
                               {tutorial.courseName}
                             </div>
                             <div className="font-medium">
