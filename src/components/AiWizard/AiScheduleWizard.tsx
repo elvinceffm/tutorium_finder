@@ -121,7 +121,7 @@ export const AiScheduleWizard = ({ semester, onPlanGenerated, isOpen, setIsOpen 
         {step === 'form' && (
           <div className="space-y-6 py-4">
             <div className="space-y-3">
-              <Label>Schedule Density</Label>
+              <Label>Stundenplan-Dichte</Label>
               <ToggleGroup 
                 type="single" 
                 value={optimizationGoal} 
@@ -129,32 +129,32 @@ export const AiScheduleWizard = ({ semester, onPlanGenerated, isOpen, setIsOpen 
                 className="justify-start"
               >
                 <ToggleGroupItem value="compact" aria-label="Compact">
-                  Compact (Max free days)
+                  Kompakt (Freie Tage)
                 </ToggleGroupItem>
                 <ToggleGroupItem value="balanced" aria-label="Balanced">
-                  Balanced
+                  Ausgewogen
                 </ToggleGroupItem>
               </ToggleGroup>
             </div>
 
             <div className="space-y-3">
-              <Label>Time Preference</Label>
+              <Label>Tageszeit-Präferenz</Label>
               <ToggleGroup 
                 type="single" 
                 value={timePreference} 
                 onValueChange={(v) => v && setTimePreference(v as any)}
                 className="justify-start"
               >
-                <ToggleGroupItem value="morning">Morning</ToggleGroupItem>
-                <ToggleGroupItem value="afternoon">Afternoon</ToggleGroupItem>
-                <ToggleGroupItem value="any">Flexible</ToggleGroupItem>
+                <ToggleGroupItem value="morning">Vormittag</ToggleGroupItem>
+                <ToggleGroupItem value="afternoon">Nachmittag</ToggleGroupItem>
+                <ToggleGroupItem value="any">Flexibel</ToggleGroupItem>
               </ToggleGroup>
             </div>
             
             <div className="space-y-3">
-              <Label>Seminar Preferences (e.g. Pol. Theorie, Dalia Ali)</Label>
+              <Label>Seminar-Präferenzen (z.B. Pol. Theorie, Dalia Ali)</Label>
               <Textarea 
-                placeholder="I definitely want the seminar by Dalia Ali, keep that."
+                placeholder="Ich möchte unbedingt das Seminar bei Dalia Ali besuchen."
                 value={seminarPreference}
                 onChange={(e) => setSeminarPreference(e.target.value)}
                 className="resize-none h-16"
@@ -162,9 +162,9 @@ export const AiScheduleWizard = ({ semester, onPlanGenerated, isOpen, setIsOpen 
             </div>
 
             <div className="space-y-3">
-              <Label>Strict Context & Constraints</Label>
+              <Label>Kontext & Constraints</Label>
               <Textarea 
-                placeholder="Must have a 2 hour lunch break on Wednesdays. No classes on Friday."
+                placeholder="Mittwochs brauche ich eine 2-stündige Mittagspause. Freitags keine Kurse."
                 value={freeformText}
                 onChange={(e) => setFreeformText(e.target.value)}
                 className="resize-none h-20"
@@ -205,10 +205,10 @@ export const AiScheduleWizard = ({ semester, onPlanGenerated, isOpen, setIsOpen 
                 onClick={() => setCurrentPlanIndex(Math.max(0, currentPlanIndex - 1))}
                 disabled={currentPlanIndex === 0}
               >
-                <ChevronLeft className="w-4 h-4 mr-1" /> Prev
+                <ChevronLeft className="w-4 h-4 mr-1" /> Zurück
               </Button>
               <span className="text-sm font-medium">
-                Plan {currentPlanIndex + 1} of {generatedPlans.length}
+                Plan {currentPlanIndex + 1} von {generatedPlans.length}
               </span>
               <Button 
                 variant="outline" 
@@ -216,16 +216,16 @@ export const AiScheduleWizard = ({ semester, onPlanGenerated, isOpen, setIsOpen 
                 onClick={() => setCurrentPlanIndex(Math.min(generatedPlans.length - 1, currentPlanIndex + 1))}
                 disabled={currentPlanIndex === generatedPlans.length - 1}
               >
-                Next <ChevronRight className="w-4 h-4 ml-1" />
+                Weiter <ChevronRight className="w-4 h-4 ml-1" />
               </Button>
             </div>
 
             <div className="flex gap-3">
               <Button variant="secondary" onClick={() => setStep('form')} className="flex-1">
-                Discard
+                Verwerfen
               </Button>
               <Button onClick={handleAccept} className="flex-1">
-                Save Schedule
+                Plan speichern
               </Button>
             </div>
           </div>
