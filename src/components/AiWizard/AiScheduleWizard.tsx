@@ -91,7 +91,7 @@ export const AiScheduleWizard = ({ semester, onPlanGenerated, isOpen, setIsOpen 
       }
     } catch (error: any) {
       console.error(error);
-      alert(\`Error generating schedule: \${error.message}\`);
+      alert(`Error generating schedule: ${error.message}`);
       setStep('form');
     }
   };
