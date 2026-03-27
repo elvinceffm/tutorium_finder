@@ -47,13 +47,13 @@ export const TutorialOverview = ({ selectedSemester, aiPlanIds }: { selectedSeme
       {filteredTutorials.length === 0 ? (
         <div className="text-center py-12">
           <p className="text-muted-foreground text-lg">
-            Keine Tutorien gefunden. Versuche andere Suchkriterien.
+            Keine Termine gefunden. Versuche andere Suchkriterien.
           </p>
         </div>
       ) : (
         <>
           <div className="mb-4 text-sm text-muted-foreground">
-            {filteredTutorials.length} {filteredTutorials.length === 1 ? "Tutorium" : "Tutorien"} gefunden
+            {filteredTutorials.length} {filteredTutorials.length === 1 ? "Termin" : "Termine"} gefunden
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredTutorials.map((tutorial) => (
