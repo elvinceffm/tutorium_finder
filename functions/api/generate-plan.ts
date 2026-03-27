@@ -17,7 +17,6 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       });
     }
 
-    // Dynamic prompt formulation tailored for DeepSeek R1 reasoning
     const prompt = `Solve this academic scheduling puzzle for a political science student at TUM.
 Your task is to generate 1 to 3 valid scheduling plans based on the user's constraints and the provided catalog of courses.
 
@@ -38,13 +37,13 @@ RULES YOU MUST FOLLOW STRICTLY:
 Here is the exact catalog of available classes for Semester ${semester}:
 ${JSON.stringify(payload.catalog)}
 
-Solve the puzzle step by step. Then, you MUST output your final answer as a raw JSON block at the very end. The JSON must exactly match this structure:
+Solve the puzzle step by step. Write your reasoning inside <think> tags. Then, you MUST output your final answer as a raw JSON block at the very end outside the think tags. The JSON must exactly match this structure:
 {
   "plans": [
     {
       "id": "plan-1",
       "reasoning": "A concise explanation of why this plan satisfies the rules.",
-      "selectedIds": ["id1", "id2", ...]
+      "selectedIds": ["id1", "id2"]
     }
   ]
 }`;
@@ -56,11 +55,11 @@ Solve the puzzle step by step. Then, you MUST output your final answer as a raw 
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'deepseek-r1-distill-llama-70b',
+        model: 'llama-3.3-70b-versatile',
         messages: [
           { role: 'user', content: prompt }
         ],
-        temperature: 0.6, // Reasoning models prefer slightly higher temp to explore paths
+        temperature: 0.4, // Lowered slightly for strict JSON completion, but high enough to reason
       })
     });
 
