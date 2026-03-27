@@ -17,43 +17,38 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       });
     }
 
-    // Dynamic prompt formulation
-    const systemPrompt = `You are a highly capable academic scheduling assistant for a political science student at TUM (Technical University of Munich).
+    // Dynamic prompt formulation tailored for DeepSeek R1 reasoning
+    const prompt = `Solve this academic scheduling puzzle for a political science student at TUM.
 Your task is to generate 1 to 3 valid scheduling plans based on the user's constraints and the provided catalog of courses.
 
-RULES:
-1. Extract classes only from the exact provided catalog.
-2. For each distinct \`courseName\`:
-   - You MUST select exactly 1 Vorlesung (lecture) if one exists.
-   - You MUST select exactly 1 Übung (tutorial) if one exists.
-   - You MUST select exactly 1 Seminar if one exists. (If there are multiple seminars for the same course, pick the one preferred by the user, or pick the best fit).
-3. Hard constraint: Ensure no selected classes overlap in their active time. Assume classes are 90 minutes.
-4. Soft constraint logic:
+RULES YOU MUST FOLLOW STRICTLY:
+1. Extract classes ONLY from the exact provided catalog.
+2. YOU MUST ATTEND ALL COURSES. For EVERY distinct \`courseName\` in the catalog:
+   - If that course has any "Vorlesung" (lecture), you MUST include exactly 1 in the plan.
+   - If that course has any "Übung" (tutorial), you MUST include exactly 1 in the plan.
+   - If that course has any "Seminar", you MUST include exactly 1 in the plan.
+   (Do not skip any course. A single course might require you to pick both a Vorlesung AND an Übung!)
+3. HARD CONSTRAINT: No selected classes can overlap in time on the same weekday. Assume all classes are 90 minutes long.
+4. Soft constraint logic (try to apply these if possible without breaking rules 1-3):
    - Optimization goal: ${optimizationGoal === 'compact' ? 'Compact schedule to maximize entirely free days (no classes on those days). Stack them back-to-back if possible.' : 'Balanced schedule spread across the week to avoid too many classes on a single day.'}
    - Time preference: ${timePreference === 'morning' ? 'Prefer morning classes (before 13:00) when a choice exists.' : timePreference === 'afternoon' ? 'Prefer afternoon classes (after 13:00) when a choice exists.' : 'No strict time of day preference.'}
 5. User specific requests and constraints: "${freeformText || 'None'}"
 6. Seminar preference note if any: "${seminarPreference || 'None'}"
 
-You must respond STRICLY in the following JSON format. NO extra conversational text, just valid JSON:
+Here is the exact catalog of available classes for Semester ${semester}:
+${JSON.stringify(payload.catalog)}
+
+Solve the puzzle step by step. Then, you MUST output your final answer as a raw JSON block at the very end. The JSON must exactly match this structure:
 {
   "plans": [
     {
       "id": "plan-1",
-      "reasoning": "A short, concise human-readable explanation of why you chose these specific groups to fulfill the user's constraints.",
+      "reasoning": "A concise explanation of why this plan satisfies the rules.",
       "selectedIds": ["id1", "id2", ...]
     }
   ]
-}
-If the constraints are very tight, return 1 plan. If there are multiple viable ways to arrange it, return up to 3 plans.
-`;
+}`;
 
-    const url = new URL(context.request.url);
-    const origin = url.origin;
-    
-    // We cannot reliably import from src/data due to how Pages Functions are built separately in some setups,
-    // but typically we can. Let's instead expect the client to send the catalog, OR since catalog is tiny, we can import it if the bundler supports it.
-    // However, sending it from the client is safer to avoid any bundler import path issues in CF Pages. Let's update `AiPreferencePayload` to include `catalog`.
-    
     const groqResponse = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -61,13 +56,11 @@ If the constraints are very tight, return 1 plan. If there are multiple viable w
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'llama-3.3-70b-versatile',
+        model: 'deepseek-r1-distill-llama-70b',
         messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: `Semester: ${semester}\nCatalog:\n${JSON.stringify(payload.catalog)}` }
+          { role: 'user', content: prompt }
         ],
-        temperature: 0.2, // Low temperature for more logical/strict parsing
-        response_format: { type: 'json_object' }
+        temperature: 0.6, // Reasoning models prefer slightly higher temp to explore paths
       })
     });
 
@@ -77,7 +70,23 @@ If the constraints are very tight, return 1 plan. If there are multiple viable w
     }
 
     const data = await groqResponse.json();
-    const content = data.choices[0].message.content;
+    let content = data.choices[0].message.content;
+
+    // Reasoning models like DeepSeek embed their thoughts in <think> tags.
+    // We need to strip those out to extract the pure JSON block.
+    content = content.replace(/<think>[\s\S]*?<\/think>/g, '');
+    
+    // Also strip out any markdown json wrappers the model might add 
+    const jsonMatch = content.match(/```json\s*(\{[\s\S]*?\})\s*```/);
+    if (jsonMatch) {
+      content = jsonMatch[1];
+    } else {
+      // rough fallback if it doesn't use codeblocks
+      const rawMatch = content.match(/(\{[\s\S]*"plans"[\s\S]*\})/);
+      if (rawMatch) {
+         content = rawMatch[1];
+      }
+    }
 
     return new Response(content, {
       headers: { 'Content-Type': 'application/json' }

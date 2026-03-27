@@ -30,7 +30,7 @@ export const TutorialOverview = ({ selectedSemester, aiPlanIds }: { selectedSeme
 
       return matchesSearch && matchesWeekday && matchesCourse;
     });
-  }, [searchQuery, selectedWeekday, selectedCourse, selectedSemester]);
+  }, [searchQuery, selectedWeekday, selectedCourse, selectedSemester, aiPlanIds]);
 
   return (
     <div className="animate-in fade-in duration-500">
