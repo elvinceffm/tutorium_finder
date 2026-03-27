@@ -61,7 +61,7 @@ If the constraints are very tight, return 1 plan. If there are multiple viable w
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'llama3-70b-8192',
+        model: 'llama-3.3-70b-versatile',
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: `Semester: ${semester}\nCatalog:\n${JSON.stringify(payload.catalog)}` }

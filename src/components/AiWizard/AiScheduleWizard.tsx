@@ -72,7 +72,8 @@ export const AiScheduleWizard = ({ semester, onPlanGenerated, isOpen, setIsOpen 
       });
       
       if (!response.ok) {
-        throw new Error('Failed to generate plan');
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || 'Failed to generate plan');
       }
       
       const data: AiPlanResponse = await response.json();
@@ -88,9 +89,9 @@ export const AiScheduleWizard = ({ semester, onPlanGenerated, isOpen, setIsOpen 
       } else {
         throw new Error('No plans generated');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
-      alert("Error generating schedule. Please try again.");
+      alert(\`Error generating schedule: \${error.message}\`);
       setStep('form');
     }
   };
