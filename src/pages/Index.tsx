@@ -1,13 +1,22 @@
 import { useState } from "react";
-import { Calendar, List, GraduationCap } from "lucide-react";
+import { Calendar, List, GraduationCap, Cpu, Key } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TutorialOverview } from "@/components/TutorialOverview";
 import { WeekCalendar } from "@/components/WeekCalendar";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { useAiPlan } from "@/hooks/useAiPlan";
+import { AiScheduleWizard } from "@/components/AiWizard/AiScheduleWizard";
+import { Button } from "@/components/ui/button";
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState("overview");
   const [selectedSemester, setSelectedSemester] = useState<number>(2);
+  const { activePlan, savePlan, clearPlan } = useAiPlan(selectedSemester);
+  const [isAiWizardOpen, setIsAiWizardOpen] = useState(false);
+  const [showAiPlan, setShowAiPlan] = useState(false);
+
+  // If there's no active plan, we can't show it
+  const isActuallyShowingAiPlan = showAiPlan && activePlan !== null;
 
   return (
     <div className="min-h-screen bg-background">
@@ -28,7 +37,34 @@ const Index = () => {
                 </p>
               </div>
             </div>
-            <ThemeToggle />
+            
+            <div className="flex items-center gap-4">
+              {activePlan ? (
+                <div className="flex items-center gap-2">
+                  <Button 
+                    variant={showAiPlan ? "default" : "outline"}
+                    onClick={() => setShowAiPlan(!showAiPlan)}
+                    size="sm"
+                    className="hidden sm:flex transition-all"
+                  >
+                    <Cpu className="w-4 h-4 mr-2" />
+                    {showAiPlan ? "AI Plan Active" : "View AI Plan"}
+                  </Button>
+                  <Button variant="ghost" size="icon" onClick={clearPlan} title="Clear AI Plan">
+                    <Key className="w-4 h-4" /> {/* Or delete icon */}
+                  </Button>
+                </div>
+              ) : (
+                <Button 
+                  onClick={() => setIsAiWizardOpen(true)}
+                  size="sm"
+                  className="hidden sm:flex"
+                >
+                  <Cpu className="w-4 h-4 mr-2" /> AI Optimizer
+                </Button>
+              )}
+              <ThemeToggle />
+            </div>
           </div>
         </div>
       </header>
@@ -54,6 +90,24 @@ const Index = () => {
               SoSe 2026
             </button>
           </div>
+          
+          {/* Mobile AI button fallback */}
+          <div className="sm:hidden mt-2">
+            {activePlan ? (
+                <Button 
+                  variant={showAiPlan ? "default" : "outline"}
+                  onClick={() => setShowAiPlan(!showAiPlan)}
+                  size="sm"
+                >
+                  <Cpu className="w-4 h-4 mr-2" />
+                  {showAiPlan ? "AI Plan Active" : "AI Plan Saved"}
+                </Button>
+            ) : (
+                <Button onClick={() => setIsAiWizardOpen(true)} size="sm">
+                  <Cpu className="w-4 h-4 mr-2" /> AI Optimizer
+                </Button>
+            )}
+          </div>
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
@@ -69,14 +123,30 @@ const Index = () => {
           </TabsList>
 
           <TabsContent value="overview">
-            <TutorialOverview selectedSemester={selectedSemester} />
+            <TutorialOverview 
+              selectedSemester={selectedSemester} 
+              aiPlanIds={isActuallyShowingAiPlan ? activePlan.selectedIds : null}
+            />
           </TabsContent>
 
           <TabsContent value="calendar">
-            <WeekCalendar selectedSemester={selectedSemester} />
+            <WeekCalendar 
+              selectedSemester={selectedSemester}
+              aiPlanIds={isActuallyShowingAiPlan ? activePlan.selectedIds : null}
+            />
           </TabsContent>
         </Tabs>
       </main>
+
+      <AiScheduleWizard
+        semester={selectedSemester}
+        isOpen={isAiWizardOpen}
+        setIsOpen={setIsAiWizardOpen}
+        onPlanGenerated={(plan) => {
+          savePlan(plan);
+          setShowAiPlan(true);
+        }}
+      />
 
       {/* Footer */}
       <footer className="border-t mt-12 py-6 bg-card/30">

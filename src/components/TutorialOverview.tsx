@@ -3,18 +3,19 @@ import { TutorialCard } from "./TutorialCard";
 import { TutorialFilters } from "./TutorialFilters";
 import { tutorials } from "@/data/tutorials";
 
-export const TutorialOverview = ({ selectedSemester }: { selectedSemester: number }) => {
+export const TutorialOverview = ({ selectedSemester, aiPlanIds }: { selectedSemester: number, aiPlanIds?: string[] | null }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedWeekday, setSelectedWeekday] = useState("all");
   const [selectedCourse, setSelectedCourse] = useState("all");
 
   const availableCourses = useMemo(() => {
     return Array.from(new Set(tutorials.filter(t => t.semester === selectedSemester).map((t) => t.courseName))).sort();
-  }, []);
+  }, [selectedSemester]);
 
   const filteredTutorials = useMemo(() => {
     return tutorials.filter((tutorial) => {
       if (tutorial.semester !== selectedSemester) return false;
+      if (aiPlanIds && !aiPlanIds.includes(tutorial.id)) return false;
       const matchesSearch =
         searchQuery === "" ||
         tutorial.courseName.toLowerCase().includes(searchQuery.toLowerCase()) ||

@@ -61,7 +61,7 @@ const calculateOverlaps = (events: any[]) => {
   return parsedEvents;
 };
 
-export const WeekCalendar = ({ selectedSemester }) => {
+export const WeekCalendar = ({ selectedSemester, aiPlanIds }: { selectedSemester: number, aiPlanIds?: string[] | null }) => {
   const [activeMobileDay, setActiveMobileDay] = useState("Montag");
   const [isMobile, setIsMobile] = useState(false);
 
@@ -96,7 +96,11 @@ export const WeekCalendar = ({ selectedSemester }) => {
   };
 
   const getTutorialsForDay = (day) => {
-    const dayTutorials = tutorials.filter((t) => t.weekday === day && t.semester === selectedSemester);
+    const dayTutorials = tutorials.filter((t) => 
+      t.weekday === day && 
+      t.semester === selectedSemester &&
+      (!aiPlanIds || aiPlanIds.includes(t.id))
+    );
     return calculateOverlaps(dayTutorials);
   };
 
