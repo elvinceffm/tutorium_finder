@@ -11,14 +11,7 @@ export const TutorialCard = ({ tutorial }: TutorialCardProps) => {
   const colorClass = getCourseColor(tutorial.courseName);
   
   return (
-    <Card className={`hover:shadow-lg transition-all duration-300 hover:-translate-y-1 group relative overflow-hidden ${tutorial.type === "Vorlesung" ? "border-primary/50" : ""}`}>
-      {tutorial.type === "Vorlesung" && (
-         <div className="absolute top-0 right-0 w-16 h-16 pointer-events-none overflow-hidden">
-           <div className="absolute top-4 -right-4 bg-primary text-primary-foreground text-[10px] font-bold py-0.5 px-6 rotate-45 shadow-sm">
-             VORLESUNG
-           </div>
-         </div>
-      )}
+    <Card className={`hover:shadow-lg transition-all duration-300 hover:-translate-y-1 group relative overflow-hidden ${tutorial.type === "Vorlesung" ? "border-primary/50 ring-1 ring-primary/20" : ""}`}>
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between gap-2">
           <CardTitle className="text-lg leading-tight group-hover:text-primary transition-colors">

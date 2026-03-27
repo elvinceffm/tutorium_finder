@@ -1,4 +1,6 @@
-import { useMemo, useState, useEffect } from "react";
+const fs = require('fs');
+
+const code = `import { useMemo, useState, useEffect } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { tutorials, weekdays, getCourseColor } from "@/data/tutorials";
 import { Card } from "@/components/ui/card";
@@ -6,7 +8,7 @@ import { MapPin, User, BookOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 // Utility to calculate overlap groups
-const calculateOverlaps = (events: any[]) => {
+const calculateOverlaps = (events) => {
   if (!events || events.length === 0) return [];
   
   const parsedEvents = events.map(event => {
@@ -16,46 +18,37 @@ const calculateOverlaps = (events: any[]) => {
     return { ...event, startMinutes, endMinutes };
   }).sort((a, b) => a.startMinutes - b.startMinutes);
 
-  let clusters: any[][] = [];
-  let currentCluster: any[] = [];
-  let clusterEnd = 0;
-
+  let columns = [];
+  let lastEventEnding = null;
+  
   parsedEvents.forEach(event => {
-    if (currentCluster.length > 0 && event.startMinutes >= clusterEnd) {
-      clusters.push(currentCluster);
-      currentCluster = [];
-      clusterEnd = 0;
+    if (lastEventEnding !== null && event.startMinutes >= lastEventEnding) {
+      columns = [];
     }
-    currentCluster.push(event);
-    if (event.endMinutes > clusterEnd) {
-      clusterEnd = event.endMinutes;
-    }
-  });
-  if (currentCluster.length > 0) {
-    clusters.push(currentCluster);
-  }
 
-  clusters.forEach(cluster => {
-    let columns: any[][] = [];
-    cluster.forEach(event => {
-      let placed = false;
-      for (let i = 0; i < columns.length; i++) {
+    let placed = false;
+    for (let i = 0; i < columns.length; i++) {
         const colLastEvent = columns[i][columns[i].length - 1];
         if (colLastEvent.endMinutes <= event.startMinutes) {
-          columns[i].push(event);
-          event.col = i;
-          placed = true;
-          break;
+            columns[i].push(event);
+            event.col = i;
+            placed = true;
+            break;
         }
-      }
-      if (!placed) {
+    }
+    
+    if (!placed) {
         event.col = columns.length;
         columns.push([event]);
-      }
-    });
-    cluster.forEach(event => {
-      event.maxCol = columns.length;
-    });
+    }
+    
+    if (lastEventEnding === null || event.endMinutes > lastEventEnding) {
+        lastEventEnding = event.endMinutes;
+    }
+  });
+  
+  parsedEvents.forEach(event => {
+    event.maxCol = columns.length;
   });
   
   return parsedEvents;
@@ -217,3 +210,6 @@ export const WeekCalendar = ({ selectedSemester }) => {
     </div>
   );
 };
+`;
+
+fs.writeFileSync('src/components/WeekCalendar.tsx', code);
