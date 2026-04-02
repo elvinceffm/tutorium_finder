@@ -4,10 +4,26 @@ export interface Env {
   GROQ_API_KEY: string;
 }
 
+interface ParsedClass {
+  id: string;
+  courseName: string;
+  type: string;
+  weekday: string;
+  instructor: string;
+  startMin: number;
+  endMin: number;
+}
+
+function parseTime(timeStr: string): number {
+  if (!timeStr || !timeStr.includes(':')) return -1;
+  const [h, m] = timeStr.split(':').map(Number);
+  return h * 60 + m;
+}
+
 export const onRequestPost: PagesFunction<Env> = async (context) => {
   try {
     const payload: AiPreferencePayload = await context.request.json();
-    const { semester, optimizationGoal, timePreference, freeformText, seminarPreference } = payload;
+    const { semester, optimizationGoal, timePreference, freeformText, seminarPreference, catalog } = payload;
     
     // Check for API key
     if (!context.env.GROQ_API_KEY) {
@@ -17,33 +33,114 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       });
     }
 
-    const prompt = `Solve this academic scheduling puzzle for a political science student at TUM.
-Your task is to generate 1 to 3 valid scheduling plans based on the user's constraints and the provided catalog of courses.
+    // --- STEP 1: DETERMINISTIC PRE-FILTERING ---
+    // Extract everything with time parsed
+    const allClasses = catalog.map((c: any): ParsedClass => ({
+      id: c.id,
+      courseName: c.courseName,
+      type: c.type,
+      weekday: c.weekday,
+      instructor: c.instructor || "",
+      startMin: parseTime(c.time),
+      endMin: parseTime(c.time) === -1 ? -1 : parseTime(c.time) + 90
+    }))
+    .filter(c => c.startMin !== -1); // Filter out things without valid times
 
-RULES YOU MUST FOLLOW STRICTLY:
-1. Extract classes ONLY from the exact provided catalog.
-2. YOU MUST ATTEND ALL COURSES. For EVERY distinct \`courseName\` in the catalog:
-   - If that course has any "Vorlesung" (lecture), you MUST include exactly 1 in the plan.
-   - If that course has any "Übung" (tutorial), you MUST include exactly 1 in the plan.
-   - If that course has any "Seminar", you MUST include exactly 1 in the plan.
-   (Do not skip any course. A single course might require you to pick both a Vorlesung AND an Übung!)
-3. HARD CONSTRAINT: No selected classes can overlap in time on the same weekday. Assume all classes are 90 minutes long.
-4. Soft constraint logic (try to apply these if possible without breaking rules 1-3):
-   - Optimization goal: ${optimizationGoal === 'compact' ? 'Compact schedule to maximize entirely free days (no classes on those days). Stack them back-to-back if possible.' : 'Balanced schedule spread across the week to avoid too many classes on a single day.'}
-   - Time preference: ${timePreference === 'morning' ? 'Prefer morning classes (before 13:00) when a choice exists.' : timePreference === 'afternoon' ? 'Prefer afternoon classes (after 13:00) when a choice exists.' : 'No strict time of day preference.'}
-5. User specific requests and constraints: "${freeformText || 'None'}"
-6. Seminar preference note if any: "${seminarPreference || 'None'}"
+    // Group catalog by courseName then type
+    const requirements: { courseName: string, type: string, classes: ParsedClass[] }[] = [];
+    const grouped = new Map<string, Map<string, ParsedClass[]>>();
 
-Here is the exact catalog of available classes for Semester ${semester}:
-${JSON.stringify(payload.catalog)}
+    for (const c of allClasses) {
+      if (!grouped.has(c.courseName)) {
+        grouped.set(c.courseName, new Map());
+      }
+      const types = grouped.get(c.courseName)!;
+      if (!types.has(c.type)) {
+        types.set(c.type, []);
+      }
+      types.get(c.type)!.push(c);
+    }
 
-Solve the puzzle step by step. Write your reasoning inside <think> tags. Then, you MUST output your final answer as a raw JSON block at the very end outside the think tags. The JSON must exactly match this structure:
+    for (const [courseName, types] of grouped.entries()) {
+      for (const [type, classes] of types.entries()) {
+        requirements.push({ courseName, type, classes });
+      }
+    }
+
+    const validSchedules: ParsedClass[][] = [];
+    const maxSchedulesToFind = 50;
+
+    function hasOverlap(schedule: ParsedClass[], newClass: ParsedClass): boolean {
+      for (const existing of schedule) {
+        if (existing.weekday === newClass.weekday) {
+          if (newClass.startMin < existing.endMin && newClass.endMin > existing.startMin) {
+            return true;
+          }
+        }
+      }
+      return false;
+    }
+
+    function search(reqIndex: number, currentSchedule: ParsedClass[]) {
+      if (validSchedules.length >= maxSchedulesToFind) return;
+      if (reqIndex === requirements.length) {
+        validSchedules.push([...currentSchedule]);
+        return;
+      }
+
+      const req = requirements[reqIndex];
+      // For this requirement (course + type), we must pick exactly one class
+      for (const candidate of req.classes) {
+        if (!hasOverlap(currentSchedule, candidate)) {
+          currentSchedule.push(candidate);
+          search(reqIndex + 1, currentSchedule);
+          currentSchedule.pop();
+        }
+      }
+    }
+
+    search(0, []);
+
+    if (validSchedules.length === 0) {
+        // Fallback: No valid schedule found. Return a dummy warning response.
+        return new Response(JSON.stringify({
+            plans: [{
+                id: "error",
+                reasoning: "No valid schedule exists without overlaps for all required modules.",
+                selectedIds: []
+            }]
+        }), { headers: { 'Content-Type': 'application/json'} });
+    }
+
+    // --- STEP 2: NEURO-SYMBOLIC SELECTION ---
+    // Simplify validSchedules for the prompt context limit
+    const scheduleDescriptions = validSchedules.map((schedule, idx) => {
+      const summary = schedule.map(c => `[ID: ${c.id}] ${c.courseName} (${c.type}) on ${c.weekday} at ${c.startMin / 60 | 0}:${(c.startMin % 60).toString().padStart(2, '0')}`).join(" | ");
+      return `Schedule option ${idx + 1}:\n${summary}`;
+    }).join("\n\n");
+
+    const prompt = `Solve this academic scheduling puzzle for a political science student at TUM by selecting the best schedule from a pre-calculated valid list.
+
+I have computationally generated ${validSchedules.length} valid schedule options that ALREADY satisfy all hard constraints (no overlaps, exactly 1 Vorlesung/Übung/Seminar per course).
+Your task is to pick the top 1 to 3 best options based ENTIRELY on the user's soft preferences.
+
+User Soft Preferences:
+- Optimization goal: ${optimizationGoal === 'compact' ? 'Compact schedule to maximize entirely free days (no classes on those days). Stack them back-to-back if possible.' : 'Balanced schedule spread across the week to avoid too many classes on a single day.'}
+- Time preference: ${timePreference === 'morning' ? 'Prefer morning classes (before 13:00).' : timePreference === 'afternoon' ? 'Prefer afternoon classes (after 13:00).' : 'No strict time of day preference.'}
+- Freeform text/requests: "${freeformText || 'None'}"
+- Seminar preference: "${seminarPreference || 'None'}"
+
+Here are the pre-calculated valid schedules:
+${scheduleDescriptions}
+
+Select the 1 to 3 best options from the list above. Write your reasoning inside <think> tags.
+Then, you MUST output your final answer as a raw JSON block at the very end outside the think tags. The JSON must exactly match this structure:
 {
   "plans": [
     {
       "id": "plan-1",
-      "reasoning": "A concise explanation of why this plan satisfies the rules.",
-      "selectedIds": ["id1", "id2"]
+      "reasoning": "A concise, user-friendly explanation of why this plan satisfies their soft preferences.",
+      "selectedIds": ["id1", "id2"] // The extracted IDs for the chosen option
     }
   ]
 }`;
@@ -59,7 +156,7 @@ Solve the puzzle step by step. Write your reasoning inside <think> tags. Then, y
         messages: [
           { role: 'user', content: prompt }
         ],
-        temperature: 0.4, // Lowered slightly for strict JSON completion, but high enough to reason
+        temperature: 0.2, // Lower temp for selection
       })
     });
 
@@ -71,16 +168,11 @@ Solve the puzzle step by step. Write your reasoning inside <think> tags. Then, y
     const data = await groqResponse.json();
     let content = data.choices[0].message.content;
 
-    // Reasoning models like DeepSeek embed their thoughts in <think> tags.
-    // We need to strip those out to extract the pure JSON block.
     content = content.replace(/<think>[\s\S]*?<\/think>/g, '');
-    
-    // Also strip out any markdown json wrappers the model might add 
     const jsonMatch = content.match(/```json\s*(\{[\s\S]*?\})\s*```/);
     if (jsonMatch) {
       content = jsonMatch[1];
     } else {
-      // rough fallback if it doesn't use codeblocks
       const rawMatch = content.match(/(\{[\s\S]*"plans"[\s\S]*\})/);
       if (rawMatch) {
          content = rawMatch[1];
