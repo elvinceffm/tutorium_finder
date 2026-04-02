@@ -45,7 +45,8 @@ ${payloadJsonStr}
 HARD CONSTRAINTS (YOU MUST ENFORCE THESE):
 1. For EVERY Course in the catalog, you MUST select EXACTLY ONE class ID from EACH AND EVERY available Type.
    Example: If a course has a "Vorlesung" group and an "Übung" group, you MUST select one ID from the "Vorlesung" array, AND one ID from the "Übung" array. Do not miss any type for any course.
-2. The classes you select must NOT overlap in time. Pay close attention to the days and time blocks.
+2. The classes you select must ABSOLUTELY NOT overlap in time with each other. A schedule with overlapping classes is INVALID. Pay close attention to the days and time blocks.
+3. If the "Freeform requests" contain exact times where the user is busy, you MUST treat those as HARD CONSTRAINTS. Do not schedule any classes during those blocked times.
 
 User Soft Preferences:
 - Optimization goal: ${optimizationGoal === 'compact' ? 'Compact schedule to maximize entirely free days (no classes on those days). Stack them back-to-back if possible.' : 'Balanced schedule spread across the week to avoid too many classes on a single day.'}
