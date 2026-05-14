@@ -1,8 +1,9 @@
 import { useMemo, useState, useEffect } from "react";
 import { ChevronLeft, ChevronRight, CalendarPlus } from "lucide-react";
-import { tutorials, weekdays, getCourseColor, getGoogleCalendarUrl } from "@/data/tutorials";
+import { tutorials, weekdays, getCourseColor, getGoogleCalendarUrl, Tutorial } from "@/data/tutorials";
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerFooter } from "@/components/ui/drawer";
 import { Card } from "@/components/ui/card";
-import { MapPin, User, BookOpen } from "lucide-react";
+import { MapPin, User, BookOpen, Clock, HandPointer } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 // Utility to calculate overlap groups
@@ -64,6 +65,7 @@ const calculateOverlaps = (events: any[]) => {
 export const WeekCalendar = ({ selectedSemester, aiPlanIds }: { selectedSemester: number, aiPlanIds?: string[] | null }) => {
   const [activeMobileDay, setActiveMobileDay] = useState("Montag");
   const [isMobile, setIsMobile] = useState(false);
+  const [selectedTutorial, setSelectedTutorial] = useState<Tutorial | null>(null);
 
   useEffect(() => {
     const defaultDays = ["Sonntag", "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag"];
@@ -170,7 +172,7 @@ export const WeekCalendar = ({ selectedSemester, aiPlanIds }: { selectedSemester
                       const endTimeStr = Math.floor(tutorial.endMinutes / 60).toString().padStart(2, "0") + ":" + (tutorial.endMinutes % 60).toString().padStart(2, "0");
 
                       return (
-                        <div key={tutorial.id} className={"absolute " + (tutorial.type === "Vorlesung" ? "ring-2 ring-white/50 border border-white/20 " : "") + colorClass + " text-white rounded-md p-1.5 lg:p-2 shadow-md hover:shadow-xl transition-all duration-200 z-10 hover:z-50 cursor-pointer overflow-hidden group flex flex-col"} style={{ top: top + "px", height: "120px", width: width, left: left }}>
+                        <div key={tutorial.id} onClick={() => isMobile && setSelectedTutorial(tutorial)} className={"absolute " + (tutorial.type === "Vorlesung" ? "ring-2 ring-white/50 border border-white/20 " : "") + colorClass + " text-white rounded-md p-1.5 lg:p-2 shadow-md hover:shadow-xl transition-all duration-200 z-10 hover:z-50 cursor-pointer overflow-hidden group flex flex-col"} style={{ top: top + "px", height: "120px", width: width, left: left }}>
                           {tutorial.type === "Vorlesung" && (
                             <div className="absolute top-0 right-0 bg-primary/20 backdrop-blur-md rounded-bl-lg px-0.5 py-0.5 z-0">
                               <BookOpen className="w-3 h-3" />
@@ -192,6 +194,9 @@ export const WeekCalendar = ({ selectedSemester, aiPlanIds }: { selectedSemester
                               </span>
                             </a>
                           </div>
+                          
+                          {/* Mobile affordance hint */}
+                          <div className="absolute bottom-1 left-1/2 -translate-x-1/2 w-4 h-0.5 bg-white/40 rounded-full lg:hidden" />
                           
                           <div className="absolute inset-0 bg-black/90 opacity-0 group-hover:opacity-100 transition-opacity p-2 rounded-md flex-col justify-center text-xs gap-1 hidden lg:flex z-20">
                             <a href={getGoogleCalendarUrl(tutorial)} target="_blank" rel="noopener noreferrer" className="absolute top-2 right-2 p-1 text-white/50 hover:text-white bg-white/10 hover:bg-white/20 rounded-md transition-colors pointer-events-auto" title="Zum Kalender hinzufügen" onClick={(e) => e.stopPropagation()}>
@@ -221,6 +226,64 @@ export const WeekCalendar = ({ selectedSemester, aiPlanIds }: { selectedSemester
           </div>
         </div>
       </div>
+
+      <Drawer open={!!selectedTutorial} onOpenChange={(open) => !open && setSelectedTutorial(null)}>
+        <DrawerContent>
+          {selectedTutorial && (() => {
+            const [hours, minutes] = selectedTutorial.time.split(":").map(Number);
+            const endMinutes = hours * 60 + minutes + 90;
+            const endTimeStr = Math.floor(endMinutes / 60).toString().padStart(2, "0") + ":" + (endMinutes % 60).toString().padStart(2, "0");
+            const colorClass = getCourseColor(selectedTutorial.courseName);
+            
+            return (
+              <>
+                <DrawerHeader className="text-left">
+                  <div className="flex items-start justify-between gap-4">
+                    <DrawerTitle className="text-lg leading-tight">
+                      {selectedTutorial.type === "Vorlesung" ? "📚 Vorlesung: " : ""}
+                      {selectedTutorial.courseName}
+                    </DrawerTitle>
+                    <BookOpen className="w-5 h-5 text-muted-foreground shrink-0" />
+                  </div>
+                  {selectedTutorial.group && (
+                    <div className="text-sm font-medium text-muted-foreground mt-1">
+                      {selectedTutorial.group}
+                    </div>
+                  )}
+                </DrawerHeader>
+                <div className="p-4 space-y-4 pt-0">
+                  <div className="flex items-center gap-2 text-sm text-foreground">
+                    <Clock className="w-4 h-4 text-muted-foreground" />
+                    <span>{selectedTutorial.weekday}, {selectedTutorial.time} - {endTimeStr} Uhr</span>
+                  </div>
+                  
+                  <div className="flex items-start gap-2 text-sm">
+                    <MapPin className="w-4 h-4 text-muted-foreground shrink-0 mt-0.5" />
+                    <a href={selectedTutorial.locationUrl} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline hover:text-primary-hover transition-colors">
+                      {selectedTutorial.location}
+                    </a>
+                  </div>
+                  
+                  {selectedTutorial.instructor && (
+                    <div className="flex items-center gap-2 text-sm">
+                      <User className="w-4 h-4 text-muted-foreground shrink-0" />
+                      <span>{selectedTutorial.instructor}</span>
+                    </div>
+                  )}
+                </div>
+                <DrawerFooter>
+                  <Button className="w-full" asChild>
+                    <a href={getGoogleCalendarUrl(selectedTutorial)} target="_blank" rel="noopener noreferrer">
+                      <CalendarPlus className="w-4 h-4 mr-2" />
+                      Zum Kalender hinzufügen
+                    </a>
+                  </Button>
+                </DrawerFooter>
+              </>
+            );
+          })()}
+        </DrawerContent>
+      </Drawer>
     </div>
   );
 };
