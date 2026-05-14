@@ -50,20 +50,20 @@ export const tutorials: Tutorial[] = [
 export const weekdays = ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag"];
 
 const COURSE_COLORS = [
-  "bg-blue-600 dark:bg-blue-500",
-  "bg-orange-500 dark:bg-orange-600",
-  "bg-emerald-600 dark:bg-emerald-500",
-  "bg-pink-600 dark:bg-pink-500",
-  "bg-violet-600 dark:bg-violet-500",
-  "bg-amber-500 dark:bg-amber-600",
-  "bg-cyan-600 dark:bg-cyan-500",
-  "bg-rose-600 dark:bg-rose-500",
-  "bg-lime-600 dark:bg-lime-700",
-  "bg-indigo-600 dark:bg-indigo-500",
-  "bg-red-500 dark:bg-red-600",
-  "bg-teal-600 dark:bg-teal-500",
-  "bg-fuchsia-600 dark:bg-fuchsia-500",
-  "bg-sky-500 dark:bg-sky-600"
+  "bg-blue-600 dark:bg-blue-500",        // Blue
+  "bg-amber-500 dark:bg-amber-600",      // Yellow/Orange
+  "bg-emerald-600 dark:bg-emerald-500",  // Green
+  "bg-purple-600 dark:bg-purple-500",    // Purple
+  "bg-rose-600 dark:bg-rose-500",        // Red/Rose
+  "bg-cyan-600 dark:bg-cyan-500",        // Light Blue/Cyan
+  "bg-orange-500 dark:bg-orange-600",    // Deep Orange
+  "bg-lime-600 dark:bg-lime-700",        // Light Green
+  "bg-pink-600 dark:bg-pink-500",        // Pink
+  "bg-indigo-600 dark:bg-indigo-500",    // Deep Blue Sub-shade
+  "bg-teal-600 dark:bg-teal-500",        // Teal
+  "bg-fuchsia-600 dark:bg-fuchsia-500",  // Magenta
+  "bg-sky-500 dark:bg-sky-600",          // Sky Blue
+  "bg-red-600 dark:bg-red-500"           // Deep Red
 ];
 
 let clientColorMap: Record<string, string> | null = null;
