@@ -132,3 +132,31 @@ export const getCourseColor = (courseName: string): string => {
   
   return COURSE_COLORS[Math.abs(hash) % COURSE_COLORS.length];
 };
+
+export const getGoogleCalendarUrl = (tutorial: Tutorial) => {
+  const germanWeekdays = ["Sonntag", "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag"];
+  const targetDay = germanWeekdays.indexOf(tutorial.weekday);
+  const now = new Date();
+  
+  let daysUntil = targetDay - now.getDay();
+  // If the day has already passed this week, schedule for next week
+  if (daysUntil < 0) daysUntil += 7;
+  
+  const [hours, minutes] = tutorial.time.split(':').map(Number);
+  
+  const startDate = new Date(now);
+  startDate.setDate(now.getDate() + daysUntil);
+  startDate.setHours(hours, minutes, 0, 0);
+
+  // Assuming standard 90-minute session length
+  const endDate = new Date(startDate.getTime() + 90 * 60000);
+
+  const formatToUTC = (date: Date) => date.toISOString().replace(/-|:|\.\d+/g, '');
+  const dates = `${formatToUTC(startDate)}/${formatToUTC(endDate)}`;
+
+  const title = encodeURIComponent(`${tutorial.courseName} ${tutorial.group ? `(${tutorial.group})` : ''} - ${tutorial.type}`);
+  const location = encodeURIComponent(tutorial.location);
+  const details = encodeURIComponent(`Dozent: ${tutorial.instructor || 'N/A'}\nStandort: ${tutorial.locationUrl}\n${tutorial.notes}`);
+
+  return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${dates}&details=${details}&location=${location}`;
+};

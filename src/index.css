@@ -30,7 +30,7 @@ All colors MUST be HSL. TUM Blue as primary with fresh, modern accents.
     --muted-foreground: 210 10% 45%;
 
     /* Accent color for highlights */
-    --accent: 170 60% 45%;
+    --accent: 207 78% 43%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84% 60%;
@@ -47,7 +47,7 @@ All colors MUST be HSL. TUM Blue as primary with fresh, modern accents.
     --calendar-border: 210 20% 90%;
     --calendar-hour-line: 210 15% 85%;
     --calendar-event-1: 207 100% 37%;
-    --calendar-event-2: 170 60% 45%;
+    --calendar-event-2: 207 78% 43%;
     --calendar-event-3: 30 95% 55%;
     --calendar-event-4: 280 60% 55%;
     
@@ -75,7 +75,7 @@ All colors MUST be HSL. TUM Blue as primary with fresh, modern accents.
     --muted: 210 20% 18%;
     --muted-foreground: 210 15% 60%;
 
-    --accent: 170 60% 50%;
+    --accent: 207 78% 43%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 70% 50%;
@@ -89,7 +89,7 @@ All colors MUST be HSL. TUM Blue as primary with fresh, modern accents.
     --calendar-border: 210 20% 20%;
     --calendar-hour-line: 210 15% 25%;
     --calendar-event-1: 207 100% 45%;
-    --calendar-event-2: 170 60% 45%;
+    --calendar-event-2: 207 78% 43%;
     --calendar-event-3: 30 90% 50%;
     --calendar-event-4: 280 55% 50%;
   }

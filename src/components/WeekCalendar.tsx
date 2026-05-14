@@ -1,6 +1,6 @@
 import { useMemo, useState, useEffect } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
-import { tutorials, weekdays, getCourseColor } from "@/data/tutorials";
+import { ChevronLeft, ChevronRight, CalendarPlus } from "lucide-react";
+import { tutorials, weekdays, getCourseColor, getGoogleCalendarUrl } from "@/data/tutorials";
 import { Card } from "@/components/ui/card";
 import { MapPin, User, BookOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -194,7 +194,10 @@ export const WeekCalendar = ({ selectedSemester, aiPlanIds }: { selectedSemester
                           </div>
                           
                           <div className="absolute inset-0 bg-black/90 opacity-0 group-hover:opacity-100 transition-opacity p-2 rounded-md flex-col justify-center text-xs gap-1 hidden lg:flex z-20">
-                            <div className="font-semibold line-clamp-2">
+                            <a href={getGoogleCalendarUrl(tutorial)} target="_blank" rel="noopener noreferrer" className="absolute top-2 right-2 p-1 text-white/50 hover:text-white bg-white/10 hover:bg-white/20 rounded-md transition-colors pointer-events-auto" title="Zum Kalender hinzufügen" onClick={(e) => e.stopPropagation()}>
+                              <CalendarPlus className="w-3.5 h-3.5" />
+                            </a>
+                            <div className="font-semibold line-clamp-2 pr-6">
                               {tutorial.type === "Vorlesung" ? "📚 Vorlesung: " : ""}
                               {tutorial.courseName}
                             </div>

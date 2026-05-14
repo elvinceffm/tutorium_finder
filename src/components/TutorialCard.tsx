@@ -1,7 +1,8 @@
-import { Clock, MapPin, User, Languages, BookOpen, Users } from "lucide-react";
+import { Clock, MapPin, User, Languages, BookOpen, Users, CalendarPlus } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Tutorial, getCourseColor } from "@/data/tutorials";
+import { Button } from "@/components/ui/button";
+import { Tutorial, getCourseColor, getGoogleCalendarUrl } from "@/data/tutorials";
 
 interface TutorialCardProps {
   tutorial: Tutorial;
@@ -37,10 +38,18 @@ export const TutorialCard = ({ tutorial }: TutorialCardProps) => {
         )}
       </CardHeader>
       <CardContent className="space-y-3">
-        <div className="flex items-center gap-2 text-sm">
-          <Clock className="w-4 h-4 text-muted-foreground shrink-0" />
-          <span className="font-medium">{tutorial.weekday}</span>
-          <span className="text-muted-foreground">um {tutorial.time} Uhr</span>
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2 text-sm">
+            <Clock className="w-4 h-4 text-muted-foreground shrink-0" />
+            <span className="font-medium">{tutorial.weekday}</span>
+            <span className="text-muted-foreground">um {tutorial.time} Uhr</span>
+          </div>
+          <Button variant="outline" size="sm" className="h-7 text-xs px-2 shrink-0" asChild>
+            <a href={getGoogleCalendarUrl(tutorial)} target="_blank" rel="noopener noreferrer">
+              <CalendarPlus className="w-3 h-3 mr-1" />
+              Kalender
+            </a>
+          </Button>
         </div>
         
         <div className="flex items-start gap-2 text-sm">
